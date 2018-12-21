@@ -195,6 +195,13 @@ impl<A: Actor> WeakAddr<A> {
             None => None,
         }
     }
+
+    /// Compare to other `Addr<A>` if they connect to the actor.
+    ///
+    /// Returns [`false`] if the actor has since been dropped.
+    pub fn is_same(&self, other: &Addr<A>) -> bool {
+        self.wtx.is_same(&other.tx)
+    }
 }
 
 /// `Recipient` type allows to send one specific message to an actor.

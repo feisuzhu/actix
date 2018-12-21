@@ -526,11 +526,21 @@ impl<A: Actor> Hash for AddressSender<A> {
 impl<A: Actor> WeakAddressSender<A> {
     /// Attempts to upgrade the `WeakAddressSender<A>` pointer to an [`AddressSender<A>`]
     ///
-    /// Returns [`None`] if the actor has since been dropped.
+    /// Returns [`None`] if the channel has since been dropped.
     pub fn upgrade(&self) -> Option<AddressSender<A>> {
         match Weak::upgrade(&self.inner) {
             Some(inner) => Some(AddressSenderProducer { inner }.sender()),
             None => None,
+        }
+    }
+
+    /// Compare to other `AddressSender<A>` if they connect to the same channel.
+    ///
+    /// Returns [`false`] if the channel has since been dropped.
+    pub fn is_same(&self, other: &AddressSender<A>) -> bool {
+        match self.inner.upgrade() {
+            Some(a) => Arc::ptr_eq(&a, &other.inner),
+            None => false,
         }
     }
 }

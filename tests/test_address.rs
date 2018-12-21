@@ -91,6 +91,12 @@ impl Actor for WeakRunner {
         let addr2 = MyActor3.start();
         let weak1 = addr1.downgrade();
         let weak2 = addr2.downgrade();
+
+        assert!(weak1.is_same(&addr1));
+        assert!(weak2.is_same(&addr2));
+        assert!(!weak1.is_same(&addr2));
+        assert!(!weak2.is_same(&addr1));
+
         drop(addr1);
 
         ctx.run_later(Duration::new(0, 1000), move |_, _| {
@@ -98,6 +104,9 @@ impl Actor for WeakRunner {
                 weak1.upgrade().is_none(),
                 "Should not be able to upgrade weak1!"
             );
+
+            assert!(!weak1.is_same(&addr2));
+
             match weak2.upgrade() {
                 Some(addr) => {
                     assert!(addr2 == addr);
